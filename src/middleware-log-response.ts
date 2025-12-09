@@ -1,0 +1,17 @@
+import { type Request, type Response, type NextFunction } from "express";
+
+export function middlewareLogResponse(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  res.on("finish", () => {
+    // Code Hear
+    if (res.statusCode > 399) {
+      console.log(
+        `[NON-OK] ${req.method} ${req.url} - Status: ${res.statusCode}`
+      );
+    }
+  });
+  next();
+}
