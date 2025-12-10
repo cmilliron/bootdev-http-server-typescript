@@ -8,6 +8,8 @@ import {
   handlerDisplayMetrics,
   handlerResetMetrics,
 } from "./api/handlers_metrics.js";
+import { handlerAdminDisplayMetrics } from "./api/handlers_admin.js";
+import { handerValidateChirp } from "./api/handler_validate_chirp.js";
 
 const app = express();
 const PORT = 8080;
@@ -17,8 +19,11 @@ app.use(middlewareLogResponse);
 app.use("/app", middlewareMetricsInc, express.static("./src/app"));
 
 app.get("/api/healthz", handlerReadiness);
-app.get("/api/metrics", handlerDisplayMetrics);
-app.get("/api/reset", handlerResetMetrics);
+app.post("/api/validate_chirp", handerValidateChirp);
+// app.get("/api/metrics", handlerDisplayMetrics);
+
+app.post("/admin/reset", handlerResetMetrics);
+app.get("/admin/metrics", handlerAdminDisplayMetrics);
 
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
