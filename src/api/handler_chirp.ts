@@ -1,32 +1,45 @@
-import { type Response, type Request } from "express";
-import { apiResponseForError, apiResponseWithJSON } from "./json";
+import { type Response, type Request, type NextFunction } from "express";
+import { apiResponseForError, apiResponseWithJSON } from "./json.js";
+import { BadRequestError } from "./handler_middleware.js";
 
 type parameter = {
   body: string;
 };
 
-export async function handerValidateChirp(req: Request, res: Response) {
-  let body = "";
+const BADWORDS = ["kerfuffle", "sharbert", "fornax"];
 
-  req.on("data", (chunk) => {
-    body += chunk;
-  });
-
-  req.on("end", () => {
-    try {
-      const parsedBody: parameter = JSON.parse(body);
-      if (!parsedBody.body) {
-        throw new Error("Invaid JSON");
-      }
-      if (parsedBody.body.length > 140) {
-        throw new Error("Chirp is too long");
-      }
-      apiResponseWithJSON(res, 200, { valid: true });
-    } catch (error) {
-      if (error instanceof Error) {
-        apiResponseForError(res, 400, error.message);
-      }
-      apiResponseForError(res, 400, "Something went wrong");
+export async function validateChirpHandler(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const parsedBody: parameter = req.body;
+  try {
+    if (!parsedBody.body) {
+      throw new BadRequestError("Invaid JSON");
     }
+    if (parsedBody.body.length > 140) {
+      throw new BadRequestError("Chirp is too long. Max length is 140");
+    }
+    const cleanedBody = removeProfane(parsedBody.body);
+    apiResponseWithJSON(res, 200, { valid: true, cleanedBody });
+  } catch (error) {
+    // if (error instanceof Error) {
+    //   apiResponseForError(res, 400, error.message);
+    //   return;
+    // }
+    // apiResponseForError(res, 400, "Something went wrong");
+    next(error);
+  }
+}
+
+function removeProfane(chirp: string) {
+  const profaneWords = BADWORDS;
+  const cleanedChirp = chirp.split(" ").map((word) => {
+    if (profaneWords.includes(word.toLowerCase())) {
+      return "****";
+    }
+    return word;
   });
+  return cleanedChirp.join(" ");
 }
