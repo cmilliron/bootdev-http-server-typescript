@@ -10,6 +10,7 @@ export function apiResponseForError(
 
 export function apiResponseWithJSON(res: Response, code: number, payload: any) {
   res.set("Content-Type", "application/json");
+  // console.log(payload);
   const body = JSON.stringify(payload);
   res.status(code).send(body);
 }
