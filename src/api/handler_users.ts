@@ -14,13 +14,14 @@ export async function createUserHandler(req: Request, res: Response) {
     email: string;
     password: string;
   };
-  const { email, password }: parameter = req.body;
+  let { email, password }: parameter = req.body;
   if (!email) {
     throw new BadRequestError("Email not provided");
   }
   if (!password) {
     throw new BadRequestError("Password not provided");
   }
+
   const hashedPassword = await hashPassword(password);
   const newUser: NewUser = { email, hashedPassword };
   const response = await createUser(newUser);
