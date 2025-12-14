@@ -15,6 +15,13 @@
       "when": 1765592009041,
       "tag": "0001_blushing_layla_miller",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1765645207764,
+      "tag": "0002_milky_maddog",
+      "breakpoints": true
     }
   ]
 }

@@ -2,13 +2,20 @@ import { eq } from "drizzle-orm";
 import { db } from "../index.js";
 import { chirps, NewUser, users } from "../schema.js";
 
+type returnedUser = Omit<NewUser, "hashedPassword">;
+
 export async function createUser(user: NewUser) {
-  const [result] = await db
+  const result: returnedUser[] = await db
     .insert(users)
     .values(user)
     .onConflictDoNothing()
-    .returning();
-  return result;
+    .returning({
+      id: users.id,
+      email: users.email,
+      createdAt: users.createdAt,
+      updatedAt: users.updatedAt,
+    });
+  return result[0];
 }
 
 export async function deleteAllUsers() {
@@ -16,7 +23,7 @@ export async function deleteAllUsers() {
   return result;
 }
 
-export async function getUserByName(email: string) {
+export async function getUserByEmail(email: string) {
   const [user] = await db.select().from(users).where(eq(users.email, email));
   return user;
 }

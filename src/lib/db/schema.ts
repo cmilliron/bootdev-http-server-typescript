@@ -11,6 +11,9 @@ const timestamps = {
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
   email: varchar("email", { length: 256 }).unique().notNull(),
+  hashedPassword: varchar("hashed_password", { length: 256 })
+    .notNull()
+    .default("unset"),
   ...timestamps,
 });
 
@@ -22,8 +25,7 @@ export const chirps = pgTable("chirps", {
   ...timestamps,
   userId: uuid("user_id")
     .notNull()
-    .references(() => users.id, { onDelete: "cascade" })
-    .notNull(),
+    .references(() => users.id, { onDelete: "cascade" }),
 });
 
 export type NewChirp = typeof chirps.$inferInsert;
