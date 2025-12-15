@@ -9,6 +9,8 @@ import { BadRequestError, UnauthorizedError } from "./handler_middleware.js";
 import { NewUser } from "../lib/db/schema";
 import { checkPasswordHash, hashPassword } from "../lib/utils/auth.js";
 
+export type UserResponse = Omit<NewUser, "hashedPassword">;
+
 export async function createUserHandler(req: Request, res: Response) {
   type parameter = {
     email: string;

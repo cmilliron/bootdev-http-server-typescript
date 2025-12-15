@@ -17,10 +17,16 @@ import {
 } from "../lib/db/queries/users.js";
 import { config } from "../config.js";
 import {
-  createRefreshToken,
+  saveRefreshToken,
   getRefeshToken,
   setTokenAsRevoked,
 } from "../lib/db/queries/auth.js";
+import { UserResponse } from "./handler_users.js";
+
+type LoginResponse = UserResponse & {
+  token: string;
+  refreshToken: string;
+};
 
 export async function userLoginHandler(req: Request, res: Response) {
   type parameter = {
@@ -37,22 +43,28 @@ export async function userLoginHandler(req: Request, res: Response) {
   const { hashedPassword, ...returnedUser } = await getUserByEmail(email);
   const expiresInSeconds = 60 * 60;
 
-  if (await checkPasswordHash(password, hashedPassword)) {
-    const token = makeJWT(returnedUser.id, expiresInSeconds, config.secret);
-    const refreshToken = makeRefreshToken();
-    const refreshTokenResponse = await createRefreshToken(
-      returnedUser.id,
-      refreshToken
-    );
-    // console.log(token);
-    apiResponseWithJSON(res, 200, {
-      ...returnedUser,
-      token,
-      refreshToken: refreshTokenResponse.token,
-    });
-  } else {
+  const matching = await checkPasswordHash(password, hashedPassword);
+
+  if (!matching) {
     throw new UnauthorizedError("Please check your username or password");
   }
+
+  const token = makeJWT(returnedUser.id, expiresInSeconds, config.secret);
+  const refreshToken = makeRefreshToken();
+  const refreshTokenResponse = await saveRefreshToken(
+    returnedUser.id,
+    refreshToken
+  );
+
+  if (!refreshTokenResponse) {
+    throw new UnauthorizedError("Could not save Reresh token");
+  }
+
+  apiResponseWithJSON(res, 200, {
+    ...returnedUser,
+    token,
+    refreshToken: refreshTokenResponse.token,
+  });
 }
 
 export async function refreshTokenHandler(req: Request, res: Response) {
@@ -65,14 +77,21 @@ export async function refreshTokenHandler(req: Request, res: Response) {
   const refreshToken = await getRefeshToken(bearerToken);
   console.info("Refresh Token: \n", refreshToken);
 
-  if (
-    !isRefreshTokenExpired(refreshToken.expires_at) ||
-    refreshToken.revoked_at
-  ) {
+  if (isRefreshTokenExpired(refreshToken.expires_at)) {
     throw new UnauthorizedError("Token has expired");
   }
+  if (refreshToken.revoked_at) {
+    throw new UnauthorizedError("Token was revoked");
+  }
 
-  apiResponseWithJSON(res, 200, { token: refreshToken.token });
+  const expiresInSeconds = 60 * 60;
+  const jwtToken = makeJWT(
+    refreshToken.userId,
+    expiresInSeconds,
+    config.secret
+  );
+
+  apiResponseWithJSON(res, 200, { token: jwtToken });
 }
 
 export async function revokeTokenHandler(req: Request, res: Response) {
@@ -83,10 +102,6 @@ export async function revokeTokenHandler(req: Request, res: Response) {
   }
 
   const revokedToken = await setTokenAsRevoked(bearerToken);
-
-  // if (!revokedToken) {
-  //   apiResponseForError(res, 500, "Something went wrong");
-  // }
 
   console.error("revoked token: ", revokedToken);
 

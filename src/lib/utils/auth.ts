@@ -3,7 +3,7 @@ import { JwtPayload } from "jsonwebtoken";
 import jwt from "jsonwebtoken";
 import { UnauthorizedError } from "../../api/handler_middleware.js";
 import type { Request } from "express";
-import crypto from "node:crypto";
+import crypto from "crypto";
 
 export async function hashPassword(password: string): Promise<string> {
   const hashedPassword = await argon2.hash(password);
