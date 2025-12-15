@@ -8,20 +8,33 @@ import {
   getChirpById,
 } from "../lib/db/queries/chirps.js";
 import { get } from "http";
-import { NotFoundError } from "./handler_middleware.js";
+import { NotFoundError, UnauthorizedError } from "./handler_middleware.js";
+import { getBerrerToken, validateJWT } from "../lib/utils/auth.js";
+import { config } from "../config.js";
 
 export async function createChirpHandler(req: Request, res: Response) {
   type parameter = {
     body: string;
-    userId: string;
+    // userId: string;
   };
 
-  const { body, userId }: parameter = req.body;
+  const { body }: parameter = req.body;
+  const token = getBerrerToken(req);
+  const tokenUserId = validateJWT(token, config.secret);
+  // console.log("userID: ", userId);
+  console.log("token: ", tokenUserId);
+  if (
+    !tokenUserId
+    // tokenUserId !== userId
+  ) {
+    throw new UnauthorizedError("Token does not match user");
+  }
+
   const cleanedBody = validateChirp(body);
 
   const newChirp: NewChirp = {
     body: cleanedBody,
-    userId: userId,
+    userId: tokenUserId,
   };
   const createdChirp = await createChirp(newChirp);
   apiResponseWithJSON(res, 201, createdChirp);

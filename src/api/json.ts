@@ -8,9 +8,13 @@ export function apiResponseForError(
   apiResponseWithJSON(res, code, { error: message });
 }
 
-export function apiResponseWithJSON(res: Response, code: number, payload: any) {
+export function apiResponseWithJSON(
+  res: Response,
+  code: number,
+  payload?: any
+) {
   res.set("Content-Type", "application/json");
   // console.log(payload);
-  const body = JSON.stringify(payload);
+  const body = payload ? JSON.stringify(payload) : null;
   res.status(code).send(body);
 }

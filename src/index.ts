@@ -9,7 +9,11 @@ import {
   handlerResetMetrics,
 } from "./api/handlers_metrics.js";
 import { createUserHandler } from "./api/handler_users.js";
-import { userLoginHandler } from "./api/handler_auth.js";
+import {
+  refreshTokenHandler,
+  revokeTokenHandler,
+  userLoginHandler,
+} from "./api/handler_auth.js";
 import {
   adminResetHandler,
   handlerAdminDisplayMetrics,
@@ -59,6 +63,12 @@ app.get("/api/chirps/:chirpID", (req, res, next) =>
 );
 app.post("/api/chirps", (req, res, next) =>
   Promise.resolve(createChirpHandler(req, res)).catch(next)
+);
+app.post("/api/refresh", (req, res, next) =>
+  Promise.resolve(refreshTokenHandler(req, res)).catch(next)
+);
+app.post("/api/revoke", (req, res, next) =>
+  Promise.resolve(revokeTokenHandler(req, res)).catch(next)
 );
 // app.post("/api/validate_chirp", validateChirpHandler);
 // app.get("/api/metrics", handlerDisplayMetrics);
