@@ -32,7 +32,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import { getChirpById } from "./lib/db/queries/chirps.js";
 
 // Make sure DB has latest migrationsi
-const migrationClient = postgres(config.db.dbURL, { max: 1 });
+const migrationClient = postgres(config.db.url, { max: 1 });
 await migrate(drizzle(migrationClient), config.db.migrationConfig);
 
 // console.log("dburl: ", config.dbURL);

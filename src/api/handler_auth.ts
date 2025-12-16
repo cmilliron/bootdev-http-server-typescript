@@ -41,7 +41,6 @@ export async function userLoginHandler(req: Request, res: Response) {
     throw new BadRequestError("Password not provided");
   }
   const { hashedPassword, ...returnedUser } = await getUserByEmail(email);
-  const expiresInSeconds = 60 * 60;
 
   const matching = await checkPasswordHash(password, hashedPassword);
 
@@ -49,7 +48,11 @@ export async function userLoginHandler(req: Request, res: Response) {
     throw new UnauthorizedError("Please check your username or password");
   }
 
-  const token = makeJWT(returnedUser.id, expiresInSeconds, config.secret);
+  const token = makeJWT(
+    returnedUser.id,
+    config.jwt.defaultDuration,
+    config.jwt.secret
+  );
   const refreshToken = makeRefreshToken();
   const refreshTokenResponse = await saveRefreshToken(
     returnedUser.id,
@@ -84,11 +87,10 @@ export async function refreshTokenHandler(req: Request, res: Response) {
     throw new UnauthorizedError("Token was revoked");
   }
 
-  const expiresInSeconds = 60 * 60;
   const jwtToken = makeJWT(
     refreshToken.userId,
-    expiresInSeconds,
-    config.secret
+    config.jwt.defaultDuration,
+    config.jwt.secret
   );
 
   apiResponseWithJSON(res, 200, { token: jwtToken });

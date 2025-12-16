@@ -20,7 +20,7 @@ export async function createChirpHandler(req: Request, res: Response) {
 
   const { body }: parameter = req.body;
   const token = getBerrerToken(req);
-  const tokenUserId = validateJWT(token, config.secret);
+  const tokenUserId = validateJWT(token, config.jwt.secret);
   // console.log("userID: ", userId);
   console.log("token: ", tokenUserId);
   if (
