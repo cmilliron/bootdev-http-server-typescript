@@ -80,10 +80,10 @@ export async function refreshTokenHandler(req: Request, res: Response) {
   const refreshToken = await getRefeshToken(bearerToken);
   console.info("Refresh Token: \n", refreshToken);
 
-  if (isRefreshTokenExpired(refreshToken.expires_at)) {
+  if (isRefreshTokenExpired(refreshToken.expiresAt)) {
     throw new UnauthorizedError("Token has expired");
   }
-  if (refreshToken.revoked_at) {
+  if (refreshToken.revokedAt) {
     throw new UnauthorizedError("Token was revoked");
   }
 
@@ -104,8 +104,6 @@ export async function revokeTokenHandler(req: Request, res: Response) {
   }
 
   const revokedToken = await setTokenAsRevoked(bearerToken);
-
-  console.error("revoked token: ", revokedToken);
 
   apiResponseWithJSON(res, 204);
 }

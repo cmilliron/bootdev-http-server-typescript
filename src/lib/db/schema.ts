@@ -35,11 +35,8 @@ export const refreshTokens = pgTable("refresh_tokens", {
   userId: uuid("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  expires_at: timestamp("expires_at")
-    .notNull()
-    .defaultNow()
-    .$default(() => new Date(Date.now() + 1000 * 60 * 60 * 24 * 60)),
-  revoked_at: timestamp("revoked_at"),
+  expiresAt: timestamp("expires_at").notNull(),
+  revokedAt: timestamp("revoked_at"),
   ...timestamps,
 });
 
