@@ -57,11 +57,8 @@ export async function userUpdateLoginHandler(req: Request, res: Response) {
 
   // Validate Parameters
   let { email, password }: parameter = req.body;
-  if (!email) {
-    throw new BadRequestError("Email not provided");
-  }
-  if (!password) {
-    throw new BadRequestError("Password not provided");
+  if (!email || !password) {
+    throw new BadRequestError("Missing Required Field");
   }
 
   // Update User
