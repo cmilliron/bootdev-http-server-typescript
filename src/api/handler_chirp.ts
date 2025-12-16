@@ -6,9 +6,13 @@ import {
   createChirp,
   getAllChirps,
   getChirpById,
+  deleteChirpById,
 } from "../lib/db/queries/chirps.js";
-import { get } from "http";
-import { NotFoundError, UnauthorizedError } from "./handler_middleware.js";
+import {
+  ForbiddenError,
+  NotFoundError,
+  UnauthorizedError,
+} from "./handler_middleware.js";
 import { getBerrerToken, validateJWT } from "../lib/utils/auth.js";
 import { config } from "../config.js";
 
@@ -53,4 +57,33 @@ export async function getChirpHandler(req: Request, res: Response) {
   }
   // console.log("In chirp handers");
   apiResponseWithJSON(res, 200, chirp);
+}
+
+export async function deleteChirpHandler(req: Request, res: Response) {
+  // ValidateJWT
+  const bearerToken = getBerrerToken(req);
+  const userId = validateJWT(bearerToken, config.jwt.secret);
+
+  if (!userId) {
+    throw new UnauthorizedError("Token is bad");
+  }
+
+  const { chirpID } = req.params;
+
+  const chirp = await getChirpById(chirpID);
+  if (!chirp) {
+    throw new NotFoundError(`Chirp with chirpId: ${chirpID} not found`);
+  }
+
+  if (chirp.userId !== userId) {
+    throw new ForbiddenError("Forbidden text");
+  }
+
+  const deleted = await deleteChirpById(chirpID);
+
+  if (!deleted) {
+    throw new NotFoundError("Tweet not found");
+  }
+
+  apiResponseWithJSON(res, 204);
 }
