@@ -34,6 +34,7 @@ import postgres from "postgres";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { getChirpById } from "./lib/db/queries/chirps.js";
+import { upgradeChirpyRedHandler } from "./api/handler_is_chirpy_red.js";
 
 // Make sure DB has latest migrationsi
 const migrationClient = postgres(config.db.url, { max: 1 });
@@ -80,6 +81,9 @@ app.post("/api/refresh", (req, res, next) =>
 );
 app.post("/api/revoke", (req, res, next) =>
   Promise.resolve(revokeTokenHandler(req, res)).catch(next)
+);
+app.post("/api/polka/webhooks", (req, res, next) =>
+  Promise.resolve(upgradeChirpyRedHandler(req, res)).catch(next)
 );
 // app.post("/api/validate_chirp", validateChirpHandler);
 // app.get("/api/metrics", handlerDisplayMetrics);

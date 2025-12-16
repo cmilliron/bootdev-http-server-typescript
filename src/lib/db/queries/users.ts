@@ -19,6 +19,7 @@ export async function createUser(user: NewUser) {
       email: users.email,
       createdAt: users.createdAt,
       updatedAt: users.updatedAt,
+      isChirpyRed: users.isChirpyRed,
     });
   return result[0];
 }
@@ -48,6 +49,22 @@ export async function updateLoginInfo(userInfo: UpdateUser) {
       email: users.email,
       createdAt: users.createdAt,
       updatedAt: users.updatedAt,
+      isChirpyRed: users.isChirpyRed,
+    });
+  return user;
+}
+
+export async function upgradeChirpyRedByUserId(userId: string) {
+  const [user] = await db
+    .update(users)
+    .set({ isChirpyRed: true })
+    .where(eq(users.id, userId))
+    .returning({
+      id: users.id,
+      email: users.email,
+      createdAt: users.createdAt,
+      updatedAt: users.updatedAt,
+      isChirpyRed: users.isChirpyRed,
     });
   return user;
 }
