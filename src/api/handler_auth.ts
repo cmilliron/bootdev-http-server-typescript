@@ -9,16 +9,18 @@ import {
   isRefreshTokenExpired,
   makeJWT,
   makeRefreshToken,
+  validateJWT,
 } from "../lib/utils/auth.js";
 import {
   createUser,
   getUserByEmail,
   getUserByID,
+  UpdateUser,
 } from "../lib/db/queries/users.js";
 import { config } from "../config.js";
 import {
   saveRefreshToken,
-  getRefeshToken,
+  getUserByRefeshToken,
   setTokenAsRevoked,
 } from "../lib/db/queries/auth.js";
 import { UserResponse } from "./handler_users.js";
@@ -77,18 +79,15 @@ export async function refreshTokenHandler(req: Request, res: Response) {
     throw new UnauthorizedError("No Bearer Token");
   }
 
-  const refreshToken = await getRefeshToken(bearerToken);
-  console.info("Refresh Token: \n", refreshToken);
-
-  if (isRefreshTokenExpired(refreshToken.expiresAt)) {
-    throw new UnauthorizedError("Token has expired");
-  }
-  if (refreshToken.revokedAt) {
-    throw new UnauthorizedError("Token was revoked");
+  const result = await getUserByRefeshToken(bearerToken);
+  // console.info("Refresh Token: \n", refreshToken);
+  if (!result) {
+    throw new UnauthorizedError("invalid refresh token");
   }
 
+  const user = result.user;
   const jwtToken = makeJWT(
-    refreshToken.userId,
+    user.id,
     config.jwt.defaultDuration,
     config.jwt.secret
   );

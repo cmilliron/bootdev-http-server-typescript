@@ -10,16 +10,16 @@ export function handlerAdminDisplayMetrics(req: Request, res: Response) {
   res.send(`<html>
   <body>
     <h1>Welcome, Chirpy Admin</h1>
-    <p>Chirpy has been visited ${config.fileserverHits} times!</p>
+    <p>Chirpy has been visited ${config.api.fileserverHits} times!</p>
   </body>
 </html>`);
 }
 
 export async function adminResetHandler(req: Request, res: Response) {
-  if (config.platform !== "dev") {
+  if (config.api.platform !== "dev") {
     throw new ForbiddenError("You do not have permission");
   }
-  config.fileserverHits = 0;
+  config.api.fileserverHits = 0;
   // const results: NewUser[] =
   await deleteAllUsers();
   // console.log(results)

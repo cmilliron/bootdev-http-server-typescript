@@ -25,7 +25,7 @@ export async function getRefeshToken(token: string) {
   return refreshToken;
 }
 
-export async function getRefeshTokenByUserId(token: string) {
+export async function getUserByRefeshToken(token: string) {
   const [result] = await db
     .select({ user: users })
     .from(users)

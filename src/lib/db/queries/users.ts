@@ -3,6 +3,11 @@ import { db } from "../index.js";
 import { chirps, NewUser, users } from "../schema.js";
 
 type returnedUser = Omit<NewUser, "hashedPassword">;
+export type UpdateUser = {
+  userId: string;
+  email: string;
+  hashedPassword: string;
+};
 
 export async function createUser(user: NewUser) {
   const result: returnedUser[] = await db
@@ -30,5 +35,19 @@ export async function getUserByEmail(email: string) {
 
 export async function getUserByID(id: string) {
   const [user] = await db.select().from(users).where(eq(users.id, id));
+  return user;
+}
+
+export async function updateLoginInfo(userInfo: UpdateUser) {
+  const [user] = await db
+    .update(users)
+    .set({ email: userInfo.email, hashedPassword: userInfo.hashedPassword })
+    .where(eq(users.id, userInfo.userId))
+    .returning({
+      id: users.id,
+      email: users.email,
+      createdAt: users.createdAt,
+      updatedAt: users.updatedAt,
+    });
   return user;
 }

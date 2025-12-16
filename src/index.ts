@@ -8,7 +8,10 @@ import {
   handlerDisplayMetrics,
   handlerResetMetrics,
 } from "./api/handlers_metrics.js";
-import { createUserHandler } from "./api/handler_users.js";
+import {
+  createUserHandler,
+  userUpdateLoginHandler,
+} from "./api/handler_users.js";
 import {
   refreshTokenHandler,
   revokeTokenHandler,
@@ -50,6 +53,9 @@ app.get("/api/healthz", (req, res, next) =>
 );
 app.post("/api/users", (req, res, next) =>
   Promise.resolve(createUserHandler(req, res)).catch(next)
+);
+app.put("/api/users", (req, res, next) =>
+  Promise.resolve(userUpdateLoginHandler(req, res)).catch(next)
 );
 app.post("/api/login", (req, res, next) =>
   Promise.resolve(userLoginHandler(req, res)).catch(next)
