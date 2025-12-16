@@ -1,4 +1,10 @@
-import { pgTable, timestamp, varchar, uuid } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  timestamp,
+  varchar,
+  uuid,
+  boolean,
+} from "drizzle-orm/pg-core";
 
 const timestamps = {
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -14,6 +20,7 @@ export const users = pgTable("users", {
   hashedPassword: varchar("hashed_password", { length: 256 })
     .notNull()
     .default("unset"),
+  isChirpyRed: boolean("is_chirpy_red").default(false),
   ...timestamps,
 });
 
