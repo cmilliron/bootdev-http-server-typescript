@@ -23,6 +23,7 @@ import {
 } from "./api/handlers_admin.js";
 import {
   createChirpHandler,
+  deleteChirpHandler,
   getAllChirpsHandler,
   getChirpHandler,
 } from "./api/handler_chirp.js";
@@ -67,6 +68,10 @@ app.get("/api/chirps", (req, res, next) =>
 app.get("/api/chirps/:chirpID", (req, res, next) =>
   Promise.resolve(getChirpHandler(req, res)).catch(next)
 );
+app.delete("/api/chirps/:chirpID", (req, res, next) =>
+  Promise.resolve(deleteChirpHandler(req, res)).catch(next)
+);
+
 app.post("/api/chirps", (req, res, next) =>
   Promise.resolve(createChirpHandler(req, res)).catch(next)
 );
