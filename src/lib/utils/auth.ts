@@ -79,3 +79,14 @@ export function makeRefreshToken() {
 export function isRefreshTokenExpired(expiresAt: Date): boolean {
   return expiresAt.getTime() < Date.now();
 }
+
+export function getPolkaKey(req: Request): string {
+  const authHeader = req.get("Authorization");
+  console.log(authHeader);
+  if (!authHeader) {
+    throw new UnauthorizedError("User not authorized");
+  }
+  const token = authHeader.slice(7);
+  console.log(token);
+  return token;
+}

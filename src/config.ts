@@ -25,6 +25,7 @@ type APIConfig = {
   fileserverHits: number;
   platform: string;
   port: number;
+  polkaKey: string;
 };
 
 process.loadEnvFile();
@@ -38,6 +39,7 @@ export const config: Config = {
     fileserverHits: 0,
     platform: envOrThrow("PLATFORM"),
     port: Number(envOrThrow("PORT")),
+    polkaKey: envOrThrow("POLKA_KEY"),
   },
   db: {
     url: envOrThrow("DB_URL"),
