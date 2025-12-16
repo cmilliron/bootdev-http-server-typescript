@@ -1,7 +1,10 @@
 import argon2 from "argon2";
 import { JwtPayload } from "jsonwebtoken";
 import jwt from "jsonwebtoken";
-import { UnauthorizedError } from "../../api/handler_middleware.js";
+import {
+  UnauthorizedError,
+  BadRequestError,
+} from "../../api/handler_middleware.js";
 import type { Request } from "express";
 import crypto from "crypto";
 
@@ -82,11 +85,16 @@ export function isRefreshTokenExpired(expiresAt: Date): boolean {
 
 export function getPolkaKey(req: Request): string {
   const authHeader = req.get("Authorization");
-  console.log(authHeader);
   if (!authHeader) {
     throw new UnauthorizedError("User not authorized");
   }
-  const token = authHeader.slice(7);
-  console.log(token);
-  return token;
+  return extractApiKey(authHeader);
+}
+
+export function extractApiKey(authHeader: string) {
+  const splitAuth = authHeader.split(" ");
+  if (splitAuth.length < 2 || splitAuth[0] !== "ApiKey") {
+    throw new BadRequestError("Malformed authorization header");
+  }
+  return splitAuth[1];
 }

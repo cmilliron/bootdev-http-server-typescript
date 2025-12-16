@@ -7,6 +7,7 @@ import {
   getAllChirps,
   getChirpById,
   deleteChirpById,
+  getChirpsByUserId,
 } from "../lib/db/queries/chirps.js";
 import {
   ForbiddenError,
@@ -15,6 +16,16 @@ import {
 } from "./handler_middleware.js";
 import { getBerrerToken, validateJWT } from "../lib/utils/auth.js";
 import { config } from "../config.js";
+
+export type ChirpsResponse = Chirp[];
+
+type Chirp = {
+  userId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  id: string;
+  body: string;
+};
 
 export async function createChirpHandler(req: Request, res: Response) {
   type parameter = {
@@ -45,7 +56,23 @@ export async function createChirpHandler(req: Request, res: Response) {
 }
 
 export async function getAllChirpsHandler(req: Request, res: Response) {
-  const chirps = await getAllChirps();
+  type UserQuery = {
+    authorId?: string;
+    sort?: string;
+  };
+
+  const { authorId, sort } = req.query;
+  let chirps: ChirpsResponse;
+  if (authorId) {
+    chirps = await getChirpsByUserId(authorId as string);
+  } else {
+    chirps = await getAllChirps();
+  }
+
+  if (sort === "desc") {
+    chirps.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+
   apiResponseWithJSON(res, 200, chirps);
 }
 
